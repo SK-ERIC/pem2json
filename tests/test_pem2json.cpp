@@ -89,10 +89,13 @@ int main() {
 
         assert(!cli_path.empty());
 
+        std::filesystem::path cli_path_abs = std::filesystem::absolute(cli_path);
+        std::string cli_exe = cli_path_abs.string();
+
         // 1. Success case
         {
             std::filesystem::path temp_out = std::filesystem::temp_directory_path() / "pem2json_cli_out.json";
-            std::string command = "\"" + cli_path.string() + "\" ../tests/ca.crt -o \"" + temp_out.string() + "\"";
+            std::string command = "\"" + cli_exe + "\" ../tests/ca.crt -o \"" + temp_out.string() + "\"";
 
             int rc_cli = std::system(command.c_str());
             (void) rc_cli;
@@ -104,7 +107,7 @@ int main() {
 
         // 2. Failure cases
         auto expect_failure = [&](const std::string &args) {
-            std::string command = "\"" + cli_path.string() + "\" " + args + " > /dev/null 2>&1";
+            std::string command = "\"" + cli_exe + "\" " + args + " > /dev/null 2>&1";
             int rc = std::system(command.c_str());
             // We expect non-zero return code
             // In POSIX, WEXITSTATUS would be used, but system() returns implementation defined.
