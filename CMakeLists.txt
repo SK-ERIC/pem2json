@@ -63,3 +63,15 @@ if (PEM2JSON_BUILD_TESTS)
 
     add_test(NAME UnitTests COMMAND pem2json_tests)
 endif ()
+
+set(CPACK_PACKAGE_NAME "pem2json")
+set(CPACK_PACKAGE_VERSION "${PEM2JSON_VERSION}")
+set(CPACK_PACKAGE_CONTACT "pem2json")
+
+if (WIN32)
+    set(CPACK_GENERATOR "ZIP")
+else ()
+    set(CPACK_GENERATOR "TGZ")
+endif ()
+
+include(CPack)
