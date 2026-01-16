@@ -10,7 +10,11 @@ permissions:
 
 jobs:
   build-release:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -22,7 +26,11 @@ jobs:
           node-version: "lts/*"
 
       - name: Configure CMake
-        run: cmake -S . -B build
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          cmake -S . -B build -DPEM2JSON_VERSION="${VERSION}"
 
       - name: Build
         run: cmake --build build --config Release
@@ -31,12 +39,13 @@ jobs:
         run: ctest --test-dir build -C Release --output-on-failure
 
       - name: Prepare Release Asset
+        if: matrix.os == 'windows-latest'
         run: |
           Compress-Archive -Path build\Release\pem2json.exe -DestinationPath pem2json-win-x64.zip
 
       - name: Create Release
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: pem2json-win-x64.zip
           draft: false

@@ -2,13 +2,23 @@ name: CI Check
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            cmake_args: ""
+          - os: ubuntu-latest
+            cmake_args: "-DPEM2JSON_STRICT_BUILD=ON"
+          - os: macos-latest
+            cmake_args: ""
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -20,7 +30,7 @@ jobs:
           node-version: "lts/*"
 
       - name: Configure CMake
-        run: cmake -S . -B build
+        run: cmake -S . -B build ${{ matrix.cmake_args }}
 
       - name: Build
         run: cmake --build build --config Release

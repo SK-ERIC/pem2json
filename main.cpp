@@ -77,16 +77,13 @@ int main(int argc, char *argv[]) {
 
         std::string raw_content;
         if (config.input_file.empty() || config.input_file == "-") {
-            // Read from stdin
             std::istreambuf_iterator<char> begin(std::cin), end;
             raw_content = std::string(begin, end);
         } else {
-            // Read from file
             raw_content = pem2json::read_file_to_string(config.input_file);
         }
 
-        pem2json::trim_in_place(raw_content);
-        std::string json_output = pem2json::escape_for_json(raw_content);
+        std::string json_output = pem2json::pem_string_to_json_string(std::move(raw_content));
 
         if (!config.output_file.empty()) {
             std::ofstream out(config.output_file);
